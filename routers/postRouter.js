@@ -8,9 +8,12 @@ const postController = require("../controllers/postController.js");
 const multer = require("multer");
 // setto l'accesso alla cartella public per lo store dei file di multer 
 const storage = multer({dest: "public"});
+// importo morgan per eseguire il routerLogger
+const morgan = require("morgan");
 
 
-
+// lo inizializzo
+router.use(morgan('dev'));
 // setto la route base affinche mi mostri il contenuto della funzione index
 router.get("/", postController.index);
 // setto la route post a cui invierò del contenuto col quale aggiornerò l'array/json

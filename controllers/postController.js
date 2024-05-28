@@ -3,7 +3,6 @@ const fs = require("fs");
 const path = require("path");
 // importo e leggo il JSON
 let blogPosts = require("../db/db-blog.json");
-const { urlencoded } = require("express");
 // storo in una const il contenuto a cui dovrò fare replace() nell'html
 const placeHolder = "{{placeholder}}";
 // creo una funzione di replacement dei contenuti in htnl 
@@ -53,7 +52,7 @@ function index(req,res) {
                 newHtml += `
                 <div class="card overflow-hidden m-2" style="width: 400px">
                     <div class="overflow-hidden position-relative">
-                        <img src="${post.image}" class="card-img-top" alt="immagine-di-${post.slug}">
+                        <img src="/${post.image}" class="card-img-top" alt="immagine-di-${post.slug}">
                     </div>
                     <div class="card-body">
                         <a href="/posts/${post.slug}">
@@ -83,6 +82,52 @@ function index(req,res) {
             res.json(blogPosts);
         }
     })
+};
+
+// funzione di store (urlencoded && form-data)
+function store(req, res){
+    req.format({
+        json: () => {
+            const {title, content, image, tags} = req.body;
+            const newPostSlug = slugGenerator(title);
+            const newPost = {
+                title,
+                slug: newPostSlug,
+                content,
+                image,
+                tags
+            }
+            jsonUpdater([...blogPosts, newPost]);
+            res.send(blogPosts);
+        },
+        urlencoded: () => {
+            const {title, content, image, tags} = req.body;
+            const newPostSlug = slugGenerator(title);
+            const newPost = {
+                title,
+                slug: newPostSlug,
+                content,
+                image,
+                tags
+            }
+            jsonUpdater([...blogPosts, newPost]);
+            res.send(`<h1>il file ${newPost.title} è stato inviato con successo!</h1>`)
+        },
+        default: () => {
+            const {title, content,tags} = req.body;
+            const fileImage = req.file? req.file.filename : null;
+            const newPostSlug = slugGenerator(title);
+            const newPost = {
+                title,
+                slug: newPostSlug,
+                content,
+                image: fileImage,
+                tags
+            }
+            jsonUpdater([...blogPosts, newPost]);
+            res.redirect(`/posts`);
+        }
+    });
 };
 
 // setto la funzione di show
@@ -138,46 +183,20 @@ function show(req,res) {
     }
 };
 
-function store(req, res){
-    if (req.is('application/x-www-form-urlencoded')) {
-        const {title, content, image, tags} = req.body;
-        const newPostSlug = slugGenerator(title);
-        const newPost = {
-            title,
-            slug: newPostSlug,
-            content,
-            image,
-            tags
-        }
-        jsonUpdater([...blogPosts, newPost]);
-    }else {
-        const {title, content,tags} = req.body;
-        const fileImage = req.file? req.file.filename : null;
-        const newPostSlug = slugGenerator(title);
-        const newPost = {
-            title,
-            slug: newPostSlug,
-            content,
-            image: fileImage,
-            tags
-        }
-        jsonUpdater([...blogPosts, newPost]);
-    }
-    res.redirect(`/posts`);
-};
-
-
+// funzione di destroy
 function destroy(req, res){
     const reqSlug = req.params.slug;
     const postToDestroy = blogPosts.find(post => post.slug === reqSlug);
     if(postToDestroy) {
+        fileDestroyer(postToDestroy.image);
         const postlessJson = blogPosts.filter(post => post.slug !== reqSlug); 
         jsonUpdater(postlessJson);
         res.send(`Hai eliminato ${postToDestroy.title}`);
+
     } else {
         res.status(404).send(`Ci dispiace, non abbiamo trovato il post che vuoi eliminare`);
     }
-}
+};
 
 
 // esporto le funzioni così da poterle utilizzare nel file di routing
