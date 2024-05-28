@@ -10,10 +10,12 @@ app.use(express.urlencoded({extended:true}));
 const postRouter = require("./routers/postRouter");
 // importo il middleware di check degli errori
 const errorFormatter = require("./middlewares/errorFormatter");
+// importo morgan per eseguire il routerLogger
+const morgan = require("morgan");
 
 
-
-
+// lo inizializzo
+app.use(morgan('dev'));
 // effettuo un redirect alla index di /post 
 app.get('/',(req,res) =>{
     res.redirect('/posts');

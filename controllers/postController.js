@@ -12,16 +12,25 @@ function pageContentReplacer(oldcontent, content) {
 }
 // funzione per aggiornare il json 
 function jsonUpdater(newContent){
+    // estrapolo il percorso del json
     const filePath = path.join(__dirname, "../db/db-blog.json");
+    // modifico il file aggiungendo il nuovo contenuto, adesso convertito in formato adatto
     fs.writeFileSync(filePath, JSON.stringify(newContent));
+    // affinchè il sistema non richiami il json più volte 
+    // associo alla var che hostava il json, il valore del nuovo contenuto
     blogPosts = newContent;
 }
 // funzione per comporre lo slug dal title del req.body
 function slugGenerator(name){
+    // setto un counter
     let counter = 1;
+    // prendo il file e sostituisco gli spazi vuoti con "-"
     let nameToSlug = name.replaceAll(' ','-').toLowerCase().replaceAll('/', '');;
+    // estrapolo dall'array tutti gli slug per fare un confronto
     const allSlugs = blogPosts.map(post => post.slug);
+    // ciclo finche trovo uno slug uguale ad un altro
     while(allSlugs.includes(nameToSlug)) {
+        // se il ciclo viene effettuato, aggiungo all'elemento in stringa il counter e lo incremento
         nameToSlug = `${nameToSlug}-${counter}`;
         counter++;
     }
@@ -29,14 +38,14 @@ function slugGenerator(name){
 }
 // funzione per eliminare un'img da public 
 function fileDestroyer(file) {
-    // estrapolo il percoros del file
+    // estrapolo il percorso del file
     const filePath = path.join(__dirname, '../public', file);
     // lo elimino 
     fs.unlinkSync(filePath);
 }
 
 
-
+// -------------------------------------
 
 
 // setto la funzione di index

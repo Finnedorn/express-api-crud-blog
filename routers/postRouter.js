@@ -8,16 +8,15 @@ const postController = require("../controllers/postController.js");
 const multer = require("multer");
 // setto l'accesso alla cartella public per lo store dei file di multer 
 const storage = multer({dest: "public"});
-// importo morgan per eseguire il routerLogger
-const morgan = require("morgan");
+// import il middleware per fare il file check della richiesta post in store
+const postDataValidator = require("../middlewares/postDataValidator");
 
 
-// lo inizializzo
-router.use(morgan('dev'));
+
 // setto la route base affinche mi mostri il contenuto della funzione index
 router.get("/", postController.index);
 // setto la route post a cui invierò del contenuto col quale aggiornerò l'array/json
-router.post("/", storage.single("image"), postController.store);
+router.post("/", storage.single("image"), postDataValidator, postController.store);
 // la route dello show di ciascun post
 router.get("/:slug", postController.show);
 // route per l'eliminazione di un elemento
