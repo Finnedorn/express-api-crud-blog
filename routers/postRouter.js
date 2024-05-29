@@ -10,7 +10,7 @@ const multer = require("multer");
 const storage = multer({dest: "public"});
 // import il middleware per fare il file check della richiesta post in store
 const postDataValidator = require("../middlewares/postDataValidator");
-
+const deleteAssistant = require("../middlewares/deleteAssistant.js");
 
 
 // setto la route base affinche mi mostri il contenuto della funzione index
@@ -20,7 +20,7 @@ router.post("/", storage.single("image"), postDataValidator, postController.stor
 // la route dello show di ciascun post
 router.get("/:slug", postController.show);
 // route per l'eliminazione di un elemento
-router.delete("/:slug", postController.destroy);
+router.delete("/:slug", deleteAssistant, postController.destroy);
 
 
 // esporto il modulo così da poterlo utilizzare in app.js
